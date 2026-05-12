@@ -182,13 +182,10 @@ class QMMMCalculator:
         polarised by those point charges via ``pyscf.qmmm.mm_charge``.
 
         Returns the converged PySCF mean-field. Raises ImportError if PySCF
-        is not available.
+        is not available; ValueError on bad input.
         """
-        try:
-            from pyscf import dft, gto, scf
-        except ImportError as e:  # pragma: no cover
-            raise ImportError("fragment_scf needs PySCF.") from e
-
+        # Validate cheap inputs first so misuse fails fast even if PySCF
+        # isn't installed (and so CI without PySCF can exercise the contract).
         ghost_atoms = list(ghost_atoms or [])
         real_atoms = list(real_atoms)
         if not real_atoms:
@@ -196,6 +193,11 @@ class QMMMCalculator:
         overlap = set(real_atoms) & set(ghost_atoms)
         if overlap:
             raise ValueError(f"Atoms cannot be both real and ghost: {sorted(overlap)}")
+
+        try:
+            from pyscf import dft, gto, scf
+        except ImportError as e:  # pragma: no cover
+            raise ImportError("fragment_scf needs PySCF.") from e
 
         elems = list(getattr(self.system.fragment, "elems", []))
         coords = self.system.coords  # Angstrom
