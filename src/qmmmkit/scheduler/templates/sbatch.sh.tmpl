@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+#SBATCH --job-name={job_name}
+#SBATCH --output={workdir}/slurm-%j.out
+#SBATCH --error={workdir}/slurm-%j.err
+#SBATCH --time={time}
+#SBATCH --nodes={nodes}
+#SBATCH --ntasks={ntasks}
+#SBATCH --cpus-per-task={cpus_per_task}
+{mem_line}
+{partition_line}
+{account_line}
+{qos_line}
+{gres_line}
+{constraint_line}
+{extra_directives}
+
+set -euo pipefail
+
+echo "[qmmmkit] host=$(hostname) user=$(whoami) job=${{SLURM_JOB_ID:-?}} time=$(date -Is)"
+
+# --- environment setup -------------------------------------------------------
+{module_loads}
+{env_exports}
+{conda_activate}
+
+# --- run ---------------------------------------------------------------------
+cd "{workdir}"
+{run_command}
+RC=$?
+
+echo "[qmmmkit] runner exit code: $RC"
+exit $RC

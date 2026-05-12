@@ -1,0 +1,96 @@
+# --- Python -----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+wheels/
+.venv/
+venv/
+env/
+.python-version
+pip-wheel-metadata/
+
+# --- Test / lint caches -----------------------------------------------------
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.tox/
+.nox/
+
+# --- Editors / OS -----------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# --- Runtime workdirs (default places qmmmkit writes results) ---------------
+/qmmmkit_run/
+**/qmmmkit_run/
+.qmmmkit/
+**/.qmmmkit/
+
+# --- Per-job artefacts that should never be committed -----------------------
+# These are generated inside workdirs by the runner and the scheduler. We
+# excluded them broadly because workdirs can live anywhere the user points.
+**/handle.json
+**/result.json
+**/state.json
+**/events.log
+**/log.txt
+**/stdio.log
+**/slurm-*.out
+**/slurm-*.err
+**/submit.sbatch
+**/manifest.yaml.tmp
+**/*_checkpoint.json
+**/*_checkpoint.json.tmp
+**/final.xyz
+**/neb_path.npy
+**/neb_path.xyz
+**/neb_climbing.xyz
+**/neb_energies.npy
+**/pes_energies.npy
+**/eda_summary.txt
+
+# Visualisation / density files (large, regenerable)
+*.cube
+*.molden
+*.npz
+gradient.npy
+charges_*.npy
+natural_orbitals_*.molden
+
+# But keep YAML examples, source-controlled manifests, and yaml in examples/
+!examples/**/*.yaml
+
+# --- User-private config (NEVER commit) -------------------------------------
+# Local clusters config has hostnames / accounts / paths. Examples are fine.
+/clusters.yaml
+!examples/example_clusters.yaml
+.env
+.env.*
+*.pem
+*.key
+id_ed25519
+id_rsa
+secrets/
+
+# --- Bundled artifacts (rebuild on demand) ----------------------------------
+qmmmkit.sif
+*.sif
+
+# --- Docs build outputs -----------------------------------------------------
+docs/_build/
+site/

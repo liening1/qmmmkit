@@ -1,0 +1,92 @@
+# Reference cluster profiles. Save to ~/.config/qmmmkit/clusters.yaml
+# (or generate via `qmmmkit clusters add ...`) and reference by name in
+# `qmmmkit submit ... --cluster <name>` or in the GUI's Run-on dropdown.
+#
+# Two real-world shapes, annotated:
+#   1. "hpc-conda"      conda env on the HPC, no container
+#   2. "hpc-apptainer"  bring-your-own Apptainer image, no conda activate
+#   3. "hpc-spack"      Spack module hierarchy
+
+clusters:
+
+  # ------------------------------------------------------------
+  # Shape 1: conda env (output of scripts/deploy_hpc.sh)
+  # ------------------------------------------------------------
+  hpc-conda:
+    host: hpc.example.edu
+    user: jdoe
+    port: 22
+    identity_file: ~/.ssh/id_ed25519
+    workdir: /scratch/jdoe/qmmmkit-jobs       # MUST be on a shared filesystem
+    sbatch:
+      account: my-allocation
+      partition: short
+      time: "04:00:00"
+      cpus_per_task: 8
+      mem: "32G"
+      ntasks: 1
+      nodes: 1
+    modules:
+      - python/3.11                            # if your site provides it
+    conda_env: qmmmkit                         # the env scripts/deploy_hpc.sh created
+    apptainer_image: null
+    env:
+      OMP_NUM_THREADS: "8"
+      MKL_NUM_THREADS: "8"
+    runner_python: python                      # found via the activated env
+
+  # ------------------------------------------------------------
+  # Shape 2: Apptainer image (output of scripts/build_apptainer.sh)
+  # ------------------------------------------------------------
+  hpc-apptainer:
+    host: hpc.example.edu
+    user: jdoe
+    workdir: /scratch/jdoe/qmmmkit-jobs
+    sbatch:
+      account: my-allocation
+      partition: gpu
+      time: "12:00:00"
+      cpus_per_task: 8
+      mem: "64G"
+      gres: "gpu:1"
+    modules:                                    # apptainer is usually a module
+      - apptainer/1.3
+      - cuda/12.4
+    conda_env: null                             # not needed; image carries Python
+    apptainer_image: /scratch/jdoe/qmmmkit.sif  # path on the HPC
+    env:
+      APPTAINER_CACHEDIR: /scratch/jdoe/.apptainer
+    runner_python: python                       # python inside the image
+
+  # ------------------------------------------------------------
+  # Shape 3: Spack-managed install
+  # ------------------------------------------------------------
+  hpc-spack:
+    host: hpc.example.edu
+    user: jdoe
+    workdir: /scratch/jdoe/qmmmkit-jobs
+    sbatch:
+      partition: medium
+      time: "08:00:00"
+      cpus_per_task: 16
+      mem: "128G"
+    modules:
+      - spack
+      - qmmmkit/0.1.0%gcc                      # whatever the sysadmin named it
+    conda_env: null
+    apptainer_image: null
+    runner_python: python                      # taken from the loaded module
+
+  # ------------------------------------------------------------
+  # For local testing of the SLURM dispatch logic without a real cluster:
+  # point host=localhost and run a single-node SLURM via Docker.
+  # ------------------------------------------------------------
+  workstation-test:
+    host: localhost
+    user: jdoe
+    workdir: /tmp/qmmmkit-jobs
+    sbatch:
+      time: "01:00:00"
+      cpus_per_task: 4
+      mem: "8G"
+    conda_env: qmmmkit

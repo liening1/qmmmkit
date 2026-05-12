@@ -1,0 +1,95 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qmmmkit"
+version = "0.1.0"
+description = "QM/MM toolkit: PySCF + OpenMM coupled via ASH, with PES/opt/TS/IRC tasks, density-based analyses, and remote SLURM dispatch."
+requires-python = ">=3.10"
+authors = [{ name = "qmmmkit authors" }]
+license = { text = "MIT" }
+keywords = ["qmmm", "qm/mm", "pyscf", "openmm", "computational-chemistry", "slurm", "hpc", "molecular-dynamics"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "pyscf>=2.5",
+    "ase",
+    "mdtraj",
+    "parmed",
+    "geometric",
+    "PyYAML>=6",
+    "rich>=13",
+    "typer>=0.12",
+    "pydantic>=2.6",
+    "loguru>=0.7",
+    "platformdirs>=4",
+]
+
+[project.optional-dependencies]
+mm = ["openmm>=8.1", "openff-toolkit", "openmmforcefields"]
+optimizers = ["pysisyphus", "sella"]
+viz = ["py3dmol", "nglview"]
+gui = ["PySide6>=6.6", "PySide6-Addons>=6.6"]
+slurm = ["paramiko>=3", "fabric>=3"]
+dev = ["pytest", "pytest-xdist", "ruff", "mypy"]
+all = [
+    "qmmmkit[mm,optimizers,viz,gui,slurm]",
+]
+
+[project.urls]
+Homepage = "https://github.com/qmmmkit/qmmmkit"
+Documentation = "https://github.com/qmmmkit/qmmmkit#readme"
+Issues = "https://github.com/qmmmkit/qmmmkit/issues"
+Source = "https://github.com/qmmmkit/qmmmkit"
+
+[project.scripts]
+qmmmkit = "qmmmkit.cli:app"
+qmmmkit-gui = "qmmmkit.gui.app:main"
+
+# Plugin entry points. External packages can declare their own under these
+# groups; built-in plugins are registered via decorators when the subpackage
+# is imported, so we don't need to list them here.
+[project.entry-points."qmmmkit.tasks"]
+
+[project.entry-points."qmmmkit.analyses"]
+
+[project.entry-points."qmmmkit.schedulers"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qmmmkit"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/qmmmkit/gui/assets" = "qmmmkit/gui/assets"
+"src/qmmmkit/scheduler/templates" = "qmmmkit/scheduler/templates"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/qmmmkit",
+    "examples",
+    "tests",
+    "packaging",
+    "pyproject.toml",
+    "environment.yml",
+    "LICENSE",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

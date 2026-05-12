@@ -1,0 +1,57 @@
+# Reaction-path search via NEB (Nudged Elastic Band).
+#
+# Drop your reactant and product geometries (XYZ files in Angstrom) under
+# images:. Optional intermediate XYZ files between them refine the initial
+# guess; otherwise the band is linearly interpolated.
+#
+# Run:
+#   qmmmkit run examples/example_neb_manifest.yaml
+qmmmkit_version: "0.2"
+name: substrate_reaction_neb
+
+system:
+  kind: pdb
+  structure: ./reactant.pdb
+  qm_atoms: [101, 102, 103, 104, 105, 106]
+  forcefield: ["amber14-all.xml", "amber14/tip3p.xml"]
+  charge: 0
+  mult: 1
+  active_shell: 6.0
+
+qm:
+  method: DFT
+  scf_type: RKS
+  functional: B3LYP
+  basis: def2-SVP
+  dispersion: d3bj
+  density_fitting: true
+  nprocs: 8
+  memory: 8000
+
+mm:
+  platform: CPU
+  periodic_nonbonded_cutoff: 12.0
+
+embedding:
+  scheme: electrostatic
+  use_link_atoms: true
+
+task:
+  name: neb
+  options:
+    images:
+      - ./reactant.xyz
+      - ./product.xyz
+    n_images: 11
+    climbing_image: true
+    spring_constant: 0.01
+    max_cycles: 200
+    rms_force_threshold: 5.0e-3
+    max_force_threshold: 1.0e-2
+
+analyses:
+  - kind: orbital_cube
+    options:
+      frontier: 2          # HOMO-1 ... LUMO+1 cubes for the climbing image's QM region
+      spacing: 0.20
+      margin: 4.0

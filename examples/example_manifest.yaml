@@ -1,0 +1,62 @@
+# Reproducible QM/MM job manifest. Run with:
+#   qmmmkit run examples/example_manifest.yaml
+# or submit to a cluster with:
+#   qmmmkit submit examples/example_manifest.yaml --cluster hpc
+qmmmkit_version: "0.2"
+name: substrate_protein_sp
+notes: |
+  B3LYP-D3BJ/def2-SVP single point on the substrate residue (atoms 101-106) with
+  a 6 A active shell. CM5 + canonical natural-orbital analyses afterwards.
+
+system:
+  kind: pdb
+  structure: ./input.pdb
+  qm_atoms: [101, 102, 103, 104, 105, 106]
+  forcefield: ["amber14-all.xml", "amber14/tip3p.xml"]
+  charge: 0
+  mult: 1
+  active_shell: 6.0
+  name: substrate
+
+qm:
+  method: DFT
+  scf_type: RKS
+  functional: B3LYP
+  basis: def2-SVP
+  dispersion: d3bj
+  density_fitting: false
+  nprocs: 8
+  memory: 8000
+
+mm:
+  platform: CPU
+  periodic_nonbonded_cutoff: 12.0    # Angstrom (ASH convention)
+  rigid_water: false
+
+embedding:
+  scheme: electrostatic
+  use_link_atoms: true
+  link_atom_method: simple
+  link_atom_type: H
+
+task:
+  name: single_point
+  options:
+    gradient: false
+
+analyses:
+  - kind: population
+    options:
+      method: cm5
+  - kind: natural_orbitals
+    options:
+      flavour: canonical
+      correlated_method: MP2
+      write_molden: true
+  - kind: nci
+    options:
+      spacing: 0.10        # Angstrom; finer for clearer NCI iso-surfaces
+      margin: 2.0
+  - kind: orbital_cube
+    options:
+      frontier: 2          # HOMO-1, HOMO, LUMO, LUMO+1 cubes

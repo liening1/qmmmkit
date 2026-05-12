@@ -1,0 +1,38 @@
+Bootstrap: docker
+From: mambaorg/micromamba:1.5.8
+
+%labels
+    Author qmmmkit authors
+    Version 0.1.0
+    Description QM/MM toolkit (PySCF + OpenMM + ASH) headless image for SLURM workers.
+
+%files
+    environment.yml /opt/qmmmkit/environment.yml
+    pyproject.toml  /opt/qmmmkit/pyproject.toml
+    src             /opt/qmmmkit/src
+    LICENSE         /opt/qmmmkit/LICENSE
+
+%post
+    set -eux
+    apt-get update && apt-get install -y --no-install-recommends \
+        git build-essential ca-certificates curl \
+        && rm -rf /var/lib/apt/lists/*
+
+    micromamba create -n qmmmkit -f /opt/qmmmkit/environment.yml -y
+    micromamba run -n qmmmkit python -m pip install --no-deps -e /opt/qmmmkit
+    micromamba clean --all --yes
+
+%environment
+    export MAMBA_DOCKERFILE_ACTIVATE=1
+    export ENV_NAME=qmmmkit
+    export PATH=/opt/conda/envs/qmmmkit/bin:$PATH
+
+%runscript
+    exec /opt/conda/envs/qmmmkit/bin/python -m qmmmkit.runner "$@"
+
+%test
+    /opt/conda/envs/qmmmkit/bin/python -c "import qmmmkit; print('qmmmkit', qmmmkit.__version__)"
+
+# Build:    apptainer build qmmmkit.sif packaging/Apptainer.def
+# Run:      apptainer run qmmmkit.sif manifest.yaml workdir/
+# Shell in: apptainer shell qmmmkit.sif

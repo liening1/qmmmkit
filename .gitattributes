@@ -1,0 +1,48 @@
+# Default: let git normalise text to LF in the repo on commit.
+* text=auto
+
+# --- Scripts and configs that MUST be LF on Linux ----------------------------
+# A shell script with CRLF line endings dies with "bad interpreter: ^M" on
+# every Linux/macOS host, including the HPC. Pin these explicitly.
+*.sh text eol=lf
+*.bash text eol=lf
+*.def text eol=lf
+*.tmpl text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.cfg text eol=lf
+Makefile text eol=lf
+LICENSE text eol=lf
+
+# Python / JS source: LF everywhere
+*.py text eol=lf
+*.js text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.qss text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+
+# --- Windows-specific scripts: CRLF -----------------------------------------
+*.ps1 text eol=crlf
+*.psm1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# --- Binary blobs (never normalise) -----------------------------------------
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.sif binary
+*.molden binary
+*.cube binary
+*.npy binary
+*.npz binary
+*.zip binary
+*.tar binary
+*.tar.gz binary
+*.tgz binary
