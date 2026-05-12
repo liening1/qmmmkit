@@ -36,8 +36,14 @@ _HUMAN_FORMAT = (
 )
 
 
-def _json_sink(record: dict) -> None:
-    """Loguru-compatible sink that emits JSON-lines to ``record['extra']['_jsonl_path']``."""
+def _json_sink(message) -> None:
+    """Loguru sink that emits JSON-lines.
+
+    Loguru passes a ``Message`` (a ``str`` subclass) here, not the raw record
+    dict — the dict is reachable via ``message.record``.  See
+    https://loguru.readthedocs.io/en/stable/api/logger.html#loguru._logger.Logger.add
+    """
+    record = message.record
     path = record["extra"].get("_jsonl_path")
     if not path:
         return

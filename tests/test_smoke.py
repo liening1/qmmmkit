@@ -44,17 +44,27 @@ def test_orthonormal_frame():
 
 
 def test_diagonalise_in_ao_recovers_occupations():
+    """Round-trip: build P = C diag(n) C^T with C S-orthonormal, then check
+    that diagonalising P in the AO basis recovers ``n``.
+
+    To get an S-orthonormal C from a *random* matrix we need the random
+    rotation to be orthogonal in the first place: QR-decompose the random
+    matrix, then map through S^(-1/2). Without QR, c.T S c is not I and
+    the test asserts something the math doesn't guarantee.
+    """
     from qmmmkit.analysis.natural_orbitals import _diagonalise_in_ao
 
     rng = np.random.default_rng(0)
     n = 6
     s = rng.standard_normal((n, n))
-    s = s @ s.T + n * np.eye(n)
+    s = s @ s.T + n * np.eye(n)               # SPD overlap
     occ_true = np.array([2.0, 1.95, 1.7, 0.3, 0.05, 0.0])
-    a = rng.standard_normal((n, n))
+
+    q, _ = np.linalg.qr(rng.standard_normal((n, n)))   # random orthogonal
     s_evals, s_evecs = np.linalg.eigh(s)
     s_inv_half = s_evecs @ np.diag(1.0 / np.sqrt(s_evals)) @ s_evecs.T
-    c = s_inv_half @ a
+    c = s_inv_half @ q                                  # C^T S C = I now
     rdm = (c * occ_true) @ c.T
+
     occ, _ = _diagonalise_in_ao(rdm, s)
     assert np.allclose(np.sort(occ)[::-1], np.sort(occ_true)[::-1], atol=1e-8)
